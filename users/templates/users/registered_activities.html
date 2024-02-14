@@ -1,0 +1,26 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<main class="singleProject my-md">
+    <div class="container">
+        <h4 class="dev__name" >Hello {{profile.name}}, here are your registered activities:</h4>
+
+        <br>
+        <div class="participants__list scroll">
+        {% for activity in registered_activities %}
+        <li>
+            <a href="{% url 'activity' activity.id %}">
+                <h6 class="dev__title">{{ activity.title }}</h6>
+            </a>
+            (from {{ activity.start_date }} to {{ activity.end_date }})
+        </li>
+        {% endfor %}
+        <br>
+        <a href="{% url 'activities' %}">View More Activities</a>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}
+

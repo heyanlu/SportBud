@@ -1,0 +1,29 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<main class="formPage my-xl">
+    <div class="content-box">
+        <div class="formWrapper">
+            <br>
+
+            {% if request.user.profile in activity.participants.all %}
+            <form class="form" action="{% url 'leave-activity' activity.id %}" method="POST">
+                {% csrf_token %}
+                <p>Do you want to leave {{ activity }}?</p>
+                <a class="btn btn--sub btn--lg  my-md" href="{% url 'activity' activity.id %}">Go back</a>
+                <input class="btn btn--sub btn--lg  my-md" type="submit" value="Confirm" />
+            </form>
+            {% else %}
+            <form class="form" action="{% url 'registration-confirmation' activity.id %}" method="POST">
+                {% csrf_token %}
+                <p>Do you want to join {{ activity }}?</p>
+                <a class="btn btn--sub btn--lg  my-md" href="{% url 'activity' activity.id %}">Go back</a>
+                <input class="btn btn--sub btn--lg  my-md" type="submit" value="Confirm" />
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</main>
+    
+{% endblock content %}

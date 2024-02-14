@@ -1,0 +1,133 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<main class="singleProject my-md">
+    <div class="container">
+      <div class="layout">
+        <div class="column column--1of3">
+          <h3 class="singleProject__subtitle">TAGS</h3>
+          <div class="singleProject__toolStack">
+            
+            {% for tag in activity.tags.all %}
+            <span class="tag tag--pill tag--sub tag--lg">
+              <small>{{tag}}</small>
+            </span>
+            {% endfor %}      
+          </div>
+
+          {% if project.source_link %}
+          <a class="singleProject__liveLink" href="{{activity.source_link}}" target="_blank"><i class="im im-external-link"></i>Source Code
+          </a>
+          {% endif %}
+
+        </div>
+        <div class="column column--2of3">
+          <img class="singleProject__preview" src="{{ activity.featured_image.url }}" alt="portfolio thumbnail" />
+          
+          {% if not request.user.profile == activity.owner %}
+            {% if request.user.profile in activity.participants.all %}
+            <form class="form" action="{% url 'registration-confirmation' activity.id %}" method="POST">
+                {% csrf_token %}
+                <input class="btn btn--sub btn--lg" type="submit" value="Leave the Activity" />
+            </form>
+            {% else %}
+            <a class="btn btn--sub btn--lg" href="{% url 'registration-confirmation' activity.id %}">
+                Join the Activity
+            </a>
+            <p>(Join before {{ activity.registration_deadline }})</p>
+         
+            {% endif %}
+          {% endif %}
+
+          <br>
+          <a href="{% url 'user-profile' activity.owner.id %}" class="singleProject__developer organizer-link">{{ "Organizer: " }}{{ activity.owner.name }}</a>
+          
+          <h2 class="{{activity.title}}">{{activity.title}}</h2>
+          <br>
+          <h3 class="singleProject__subtitle">About the Activity</h3>
+
+          <div class="singleProject__info">
+            {{activity.description}}
+          </div>
+
+          <br>
+          <div class="activity-details__item">
+            <h3 class="devSkill__title">Start Date - End Date</h3>
+            <div class="singleProject__info">
+                {{ activity.start_date }} - {{ activity.end_date }}
+            </div>
+          </div>
+
+          <br>
+          <div class="activity-details__item">
+            <h3 class="devSkill__title">Location</h3>
+            <div class="singleProject__info">
+                {{ activity.location }} 
+            </div>
+          </div>
+      
+          <br> 
+          <div class="activity-details__item">
+              <h3 class="devSkill__title">Participants <span>({{ activity.participants.count }} Joined)</span></h3>
+              <div class="participants__list scroll">
+                  {% for user in activity.participants.all|slice:"20" %}
+                  <a href="{% url 'user-profile' user.id %}" class="participant">
+                      <p>
+                          {{ user.name }}
+                          <span>@{{ user.username }}</span>
+                      </p>
+                  </a>
+                  {% if not forloop.last %}/ {% endif %}
+                  {% endfor %}
+              </div>
+          </div>
+
+          <div class="comments">
+            <h3 class="singleProject__subtitle">Feedback</h3>
+            <h5 class="project--rating">
+              {{activity.vote_ratio}}% Postitive Feedback ({{activity.vote_total}} Vote{{activity.vote_total|pluralize:"s"}})
+            </h5>
+
+            {% if request.user.profile == activity.owner %}
+            <p>You cannot review your own work</p>
+
+            {% elif request.user.is_authenticated %}
+            <form class="form" action="{% url 'activity' activity.id %}" method="POST">
+              {% csrf_token %}
+              {% for field in form %}
+              <div class="form__field">
+                <label for="formInput#textarea">{{field.label}}</label>
+                {{field}}
+              </div>
+              {% endfor %}
+              <input class="btn btn--sub btn--lg" type="submit" value="Comments" />
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}?next={{request.path}}">Please login to leave a review</a>
+            {% endif %}
+
+            <div class="commentList">
+              {% for review in activity.review_set.all %}
+                {% if review.body %}
+                <div class="comment">
+                  <a href="{% url 'user-profile' review.owner.id %}">
+                    <img class="avatar avatar--md"
+                      src="{{review.owner.profile_image.url}}" alt="user" />
+                  </a>
+
+                  <div class="comment__details">
+                    <a href="{% url 'user-profile' review.owner.id %}" class="comment__author">{{review.owner}}</a>
+                    <p class="comment__info">{{review.body|linebreaksbr}}</p>
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+{% endblock content %}
